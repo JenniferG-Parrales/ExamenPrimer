@@ -12,13 +12,7 @@ namespace Domain.Entities
         {
             public double day { get; set; }
         }
-        //public class rain
-        //{
-        //    public double 1h {get; set;}
-
-
-
-        public class weather
+     public class weather
         {
             public int id { get; set; }
             public string main { get; set; }
@@ -33,6 +27,7 @@ namespace Domain.Entities
             public double temp { get; set; }
             public double feels_like { get; set; }
             public int pressure { get; set; }
+            public int visibility { get; set; }
             public int humidity { get; set; }
             public double dew_point { get; set; }
             public int uvi { get; set; }
@@ -53,12 +48,10 @@ namespace Domain.Entities
             public int wind_deg { get; set; }
             public List<weather> weather { get; set; }
         }
-        //public class Clouds
-        //{
-        //    public int All { get; set; }
-        //}
-        public class ForeCastInfo
+
+       public class ForeCastInfo
         {
+            public int Id { get; set; }
             public current current { get; set; }
             public List<hourly> hourly { get; set; }
 

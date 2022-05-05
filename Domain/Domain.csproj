@@ -53,10 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\Citys.cs" />
-    <Compile Include="Entities\coordenadas.cs" />
+    <Compile Include="Entities\Coordenadas.cs" />
     <Compile Include="Entities\OpenWeather.cs" />
     <Compile Include="Entities\WeatherForeCast.cs" />
+    <Compile Include="Interfaces\IModel.cs" />
     <Compile Include="Interfaces\IOpenWeatherWeb.cs" />
+    <Compile Include="Interfaces\IWeatherModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

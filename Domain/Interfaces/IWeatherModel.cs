@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface IOpenWeatherWeb
+    public interface IWeatherModel : IModel<WeatherForeCast.ForeCastInfo>
     {
-        Task<WeatherForeCast.ForeCastInfo> GetWeatherByGeo(double x, double y, long dt);
-        Task<List<Coordenadas>> GetLatLong(string city);
+        WeatherForeCast.ForeCastInfo GetById(int id);
     }
 }
