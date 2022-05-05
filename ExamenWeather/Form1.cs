@@ -25,7 +25,7 @@ namespace ExamenWeather
         //public OpenWeather openWeather;
         public WeatherForeCast.ForeCastInfo wfc;
         public IWeatherWebService opw;
-        public List <Coordenadas> cd;
+        public List <coordenadas> cd;
         public IweatherServices weatherServices;
         public Form1(IweatherServices WeatherServices, IWeatherWebService opw)
         {
@@ -38,7 +38,34 @@ namespace ExamenWeather
         {
             try
             {
-                
+                ciudad = cmbCity.SelectedItem.ToString();
+                flpContent.Controls.Clear();
+                Task.Run(Request).Wait();
+
+                x = cd[0].lat;
+                y = cd[0].lon;
+                Task.Run(Request2).Wait();
+                if (wfc == null)
+                {
+                    throw new NullReferenceException("Fallo al obtener el objeto OpenWeather.");
+                }
+                double temp = wfc.current.temp - 273.15;
+                DateTime day = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc).ToLocalTime();
+                DateTime day1 = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc).ToLocalTime();
+                lbl2Ciudad.Text = ciudad;
+                lbl4teemp.Text = (int)temp + "C";
+                lbl1Details.Text = wfc.current.weather[0].description;
+                day = day.AddSeconds(wfc.current.sunrise).ToLocalTime();
+                label6Sunrise.Text = day.ToShortTimeString();
+                day1 = day1.AddSeconds(wfc.current.sunset).ToLocalTime();
+                label5Sunset.Text = day1.ToShortTimeString();
+                label1WS.Text = wfc.current.wind_speed.ToString() + " Km/h";
+                label2Pressure.Text = wfc.current.pressure.ToString();
+                label3Humm.Text = wfc.current.humidity.ToString() + "%";
+                label4Visb.Text = wfc.current.visibility.ToString();
+                lbl3Weather.Text = wfc.current.weather[0].main;
+                WeatherIcon.ImageLocation = $"{AppSettings.ApiIcon}" + wfc.current.weather[0].icon + ".png";
+                MiniDetail mini;
                 for (int i = 0; i < 5; i++)
                 {
                     ciudad = cmbCity.SelectedItem.ToString();
@@ -54,7 +81,7 @@ namespace ExamenWeather
                         throw new NullReferenceException("Fallo al obtener el objeto OpenWeather.");
                     }
                     weatherServices.Add(wfc);
-                    double temp = wfc.current.temp - 273.15;
+                    double lbl4teemp = wfc.current.temp - 273.15;
                     WeatherPanel weatherPanel = new WeatherPanel(weatherServices, opw);
                     weatherPanel.x = x;
                     weatherPanel.y = y;
@@ -62,7 +89,7 @@ namespace ExamenWeather
                     weatherPanel.lblTemp.Text = (int)temp + "C";
                     weatherPanel.lblWeather.Text = wfc.current.weather[0].main;
                     weatherPanel.WeatherIcon.ImageLocation = $"{AppSettings.ApiIcon}" + wfc.current.weather[0].icon + ".png";
-                    flpContent.Controls.Add(weatherPanel); 
+                    flpContent.Controls.Add(weatherPanel);
                 }
 
             }
@@ -71,7 +98,18 @@ namespace ExamenWeather
 
                 MessageBox.Show(ex.Message);
             }
+
         }
+        
+        DateTime ConvertDateTime(long Milisec)
+        {
+            DateTime day = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).ToLocalTime();
+
+            day = day.AddSeconds(Milisec).ToLocalTime();
+
+            return day;
+        }
+      
 
         public async Task Request()
         {
