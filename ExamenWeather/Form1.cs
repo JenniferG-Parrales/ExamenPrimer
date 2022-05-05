@@ -1,4 +1,6 @@
-﻿using Common;
+﻿using AppCore.IServices;
+using AppCore.Services;
+using Common;
 using Domain.Entities;
 using Infraestructure.OpenWeatherClient;
 using Newtonsoft.Json;
@@ -19,14 +21,16 @@ namespace ExamenWeather
     {
         string ciudad;
         double x, y;
-        long dt = DateTimeOffset.Now.ToUnixTimeSeconds();
+        long dt;
         //public OpenWeather openWeather;
         public WeatherForeCast.ForeCastInfo wfc;
-        public OpenWeatherWeb opw;
-        public List <coordenadas> cd;
-        public Form1()
+        public IWeatherWebService opw;
+        public List <Coordenadas> cd;
+        public IweatherServices weatherServices;
+        public Form1(IweatherServices WeatherServices, IWeatherWebService opw)
         {
-            opw = new OpenWeatherWeb();
+            this.weatherServices = WeatherServices;
+            this.opw = opw;
             InitializeComponent();
         }
 
@@ -34,32 +38,38 @@ namespace ExamenWeather
         {
             try
             {
-                ciudad = cmbCity.SelectedItem.ToString();
-              
-                Task.Run(Request).Wait();
                 
-                x = cd[0].lat;
-                y = cd[0].lon;
-                Task.Run(Request2).Wait();
-                if (wfc == null)
+                for (int i = 0; i < 5; i++)
                 {
-                    throw new NullReferenceException("Fallo al obtener el objeto OpeWeather.");
+                    ciudad = cmbCity.SelectedItem.ToString();
+                    //DateTimeOffset dateTimeOffset = DateTime.Now.AddDays(-i-1);
+                    dt = DateTimeOffset.Now.ToUnixTimeSeconds();
+                    Task.Run(Request).Wait();
+
+                    x = cd[0].lat;
+                    y = cd[0].lon;
+                    Task.Run(Request2).Wait();
+                    if (wfc == null)
+                    {
+                        throw new NullReferenceException("Fallo al obtener el objeto OpenWeather.");
+                    }
+                    weatherServices.Add(wfc);
+                    double temp = wfc.current.temp - 273.15;
+                    WeatherPanel weatherPanel = new WeatherPanel(weatherServices, opw);
+                    weatherPanel.x = x;
+                    weatherPanel.y = y;
+                    weatherPanel.lblCity.Text = ciudad;
+                    weatherPanel.lblTemp.Text = (int)temp + "C";
+                    weatherPanel.lblWeather.Text = wfc.current.weather[0].main;
+                    weatherPanel.WeatherIcon.ImageLocation = $"{AppSettings.ApiIcon}" + wfc.current.weather[0].icon + ".png";
+                    flpContent.Controls.Add(weatherPanel); 
                 }
-                double tempxd = wfc.current.temp - 273.15;
-                WeatherPanel weatherPanel = new WeatherPanel();
-                weatherPanel.x = x;
-                weatherPanel.y = y;
-                weatherPanel.lblCity.Text = ciudad;
-                weatherPanel.lblTemp.Text = (int)tempxd + "C";
-                weatherPanel.lblWeather.Text = wfc.current.weather[0].main;
-                weatherPanel.WeatherIcon.ImageLocation = $"{AppSettings.ApiIcon}" + wfc.current.weather[0].icon + ".png";
-                flpContent.Controls.Add(weatherPanel);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-               
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -74,14 +84,10 @@ namespace ExamenWeather
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string fileName = "NicaraguaCitys.json";
-            string json = File.ReadAllText(fileName);
+            string json = Encoding.UTF8.GetString(Properties.Resources.NicaraguaCitys);
             List<Citys> Ciudades = new List<Citys>();
             Ciudades = JsonConvert.DeserializeObject<List<Citys>>(json);
-            foreach (Citys c in Ciudades)
-            {
-                cmbCity.Items.Add(c.City);
-            }
+            cmbCity.DataSource = Ciudades.Select(x => x.City).ToList();
         }
     }
     }
